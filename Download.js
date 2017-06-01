@@ -2,10 +2,8 @@
 // Trigger a document download
 // Ben Anderson 2016
 
-var DownloadJS = function (blob, filename, mimetype)
-{
-    if(!blob)
-    {
+var DownloadJS = function (blob, filename, mimetype) {
+    if (!blob) {
         throw {
             name: "Argument Null Exception",
             nameof: "blob",
@@ -13,8 +11,7 @@ var DownloadJS = function (blob, filename, mimetype)
         }
     }
 
-    if(!filename)
-    {
+    if (!filename) {
         throw {
             name: "Argument Null Exception",
             nameof: "filename",
@@ -22,8 +19,7 @@ var DownloadJS = function (blob, filename, mimetype)
         }
     }
 
-    if(!mimetype)
-    {
+    if (!mimetype) {
         throw {
             name: "Argument Null Exception",
             nameof: "mime",
@@ -31,8 +27,7 @@ var DownloadJS = function (blob, filename, mimetype)
         }
     }
 
-    if(!Array.isArray(blob))
-    {
+    if (!Array.isArray(blob)) {
         throw {
             name: "Type Error",
             nameof: "blob",
@@ -40,23 +35,29 @@ var DownloadJS = function (blob, filename, mimetype)
         }
     }
 
-    var objectBlob = new Blob(blob, {type: mimetype});
+    //Without the parameter "\ufeff" the charset is changed after blob generation
 
-    if(!navigator.msSaveOrOpenBlob)
-    {
+    var objectBlob = new Blob(["\ufeff", blob], {type: mimetype});
+
+    if (!navigator.msSaveOrOpenBlob) {
         var objUrl = URL.createObjectURL(objectBlob);
+
         var a = document.createElement("a");
         a.download = filename;
         a.href = objUrl;
         a.style.display = "none";
         document.body.appendChild(a);
         a.click();
-        a.remove();
-        a = undefined;
-        URL.revokeObjectURL(objUrl);
-        return;
-    } else
-    {
+        /*In linux the link download element was removed too soon. this way would help.
+         * For now this is the better approach I think.
+         * */
+        setTimeout(function () {
+            a.remove();
+            a = undefined;
+            URL.revokeObjectURL(objUrl);
+            return;
+        }, 100)
+    } else {
         navigator.msSaveOrOpenBlob(objectBlob, filename);
         return;
     }
