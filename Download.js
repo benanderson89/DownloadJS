@@ -36,8 +36,18 @@ var DownloadJS = function (blob, filename, mimetype) {
     }
 
     //Without the parameter "\ufeff" the charset is changed after blob generation
+    //however it does not work in IE11, so wrap it in a try catch and use the obsolete blob builder
 
-    var objectBlob = new Blob(["\ufeff", blob], {type: mimetype});
+    var objectBlob;
+
+    try{
+        objectBlob = new Blob(["\ufeff", blob], { type: mimetype });
+    } catch (e)
+    {
+        var bb = new window.MSBlobBuilder();
+        bb.append(blob);
+        objectBlob = bb.getBlob();
+    }
 
     if (!navigator.msSaveOrOpenBlob) {
         var objUrl = URL.createObjectURL(objectBlob);
