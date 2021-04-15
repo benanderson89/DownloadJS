@@ -1,13 +1,20 @@
 // JS Document
 // Trigger a document download
-// Ben Anderson 2016
+// Ben Anderson 2016 - 2021
 
-var DownloadJS = function (blob, filename, mimetype)
+/**
+ * 
+ * @param {The data to be downloaded as Array<string>} data 
+ * @param {The filename, including extension (EG: myfile.txt)} filename 
+ * @param {The mimetype so a blob can be generated} mimetype 
+ * @returns 
+ */
+var DownloadJS = function (data, filename, mimetype)
 {
-    if (!blob) {
+    if (!data) {
         throw {
             name: 'Argument Null Exception',
-            nameof: 'blob',
+            nameof: 'data',
             description: 'The supplied variable is null'
         }
     }
@@ -28,10 +35,10 @@ var DownloadJS = function (blob, filename, mimetype)
         }
     }
 
-    if (!Array.isArray(blob)) {
+    if (!Array.isArray(data)) {
         throw {
             name: 'Type Error',
-            nameof: 'blob',
+            nameof: 'data',
             description: 'Supplied data is not an array'
         }
     }
@@ -43,12 +50,12 @@ var DownloadJS = function (blob, filename, mimetype)
     var objectBlob;
 
     try{
-        objectBlob = new Blob(['\ufeff', blob], { type: mimetype });
+        objectBlob = new Blob(['\ufeff', data], { type: mimetype });
     } catch (e)
     {
         var bb = new window.MSBlobBuilder();
         bb.append(['\ufeff']);
-        bb.append(blob);
+        bb.append(data);
         objectBlob = bb.getBlob();
     }
     
@@ -71,9 +78,42 @@ var DownloadJS = function (blob, filename, mimetype)
             a = undefined;
             URL.revokeObjectURL(objUrl);
             return;
-        }, 100)
+        }, 5000);
     } else {
         navigator.msSaveOrOpenBlob(objectBlob, filename);
+        return;
+    }
+}
+
+/**
+ * 
+ * @param {A Blob object} blob 
+ * @param {A filename, including extension (EG: myfile.txt)} filename 
+ * @returns 
+ */
+var DownloadBlob = function(blob, filename)
+{
+    if (!navigator.msSaveOrOpenBlob) {
+        var objUrl = URL.createObjectURL(blob);
+
+        var a = document.createElement('a');
+        a.download = filename;
+        a.href = objUrl;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        /*In linux the link download element was removed too soon. this way would help.
+         * For now this is the better approach I think.
+         * */
+        setTimeout(function ()
+        {
+            a.remove();
+            a = undefined;
+            URL.revokeObjectURL(objUrl);
+            return;
+        }, 5000);
+    } else {
+        navigator.msSaveOrOpenBlob(blob, filename);
         return;
     }
 }
