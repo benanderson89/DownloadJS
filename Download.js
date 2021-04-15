@@ -93,6 +93,22 @@ var DownloadJS = function (data, filename, mimetype)
  */
 var DownloadBlob = function(blob, filename)
 {
+    if (!blob) {
+        throw {
+            name: 'Argument Null Exception',
+            nameof: 'blob',
+            description: 'The supplied variable is null'
+        }
+    }
+
+    if (!filename) {
+        throw {
+            name: 'Argument Null Exception',
+            nameof: 'filename',
+            description: 'The supplied variable is null'
+        }
+    }
+
     if (!navigator.msSaveOrOpenBlob) {
         var objUrl = URL.createObjectURL(blob);
 
